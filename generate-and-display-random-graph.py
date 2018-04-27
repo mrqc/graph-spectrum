@@ -2,13 +2,15 @@ import numpy
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
+import motifs
 
 def adjFun(x, y):
   ret = numpy.empty((x.shape[0], y.shape[1]))
   for xIndex in range(0, x.shape[0]):
     for yIndex in range(0, y.shape[1]):
       val = numpy.random.normal()
-      if val >= 0.5:
+      print val
+      if val >= 0.99:
         ret[xIndex][yIndex] = 1
       else:
         ret[xIndex][yIndex] = 0
