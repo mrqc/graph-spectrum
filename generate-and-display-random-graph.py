@@ -13,7 +13,7 @@ def adjFun(x, y):
       else:
         ret[xIndex][yIndex] = 0
   return ret
-adjMat = numpy.fromfunction(adjFun, (10, 10))
+adjMat = numpy.fromfunction(adjFun, (50, 50))
 graph = nx.DiGraph(adjMat)
 nx.draw(graph, cmap = plt.get_cmap('jet'))
 plt.show()
