@@ -7,7 +7,7 @@ def adjFun(x, y):
     threshold = 1 + numpy.random.poisson()
     for yIndex in range(0, y.shape[1]):
       val = numpy.random.normal()
-      print val
+      #print val
       if val >= threshold:
         ret[xIndex][yIndex] = 1
       else:

@@ -15,6 +15,7 @@ def degrees(adjMat):
 
 def getAdjacentNode(adjMat, nodeIndex):
   adjIndexes = []
+  print adjMat
   for index1 in range(0, len(adjMat)):
     if adjMat[nodeIndex][index1] == 1:
       adjIndexes.append(index1)
@@ -34,27 +35,48 @@ def getUndirectedAdj(directedAdjMat):
 adjMat_dir = numpy.fromfunction(graphgenerate.adjFun, (4, 4))
 (D_in, D_out, D) = degrees(adjMat_dir)
 adjMat_undir = getUndirectedAdj(adjMat_dir)
-print "adjMat_dir\n", adjMat_dir # adjancency matrix
-print "D_in\n", D_in # diagonal degree matrix for incoming edges
-print "D_out\n", D_out # diagonal degree matrix for outgoing edges
-print "D\n", D # diagonal degree matrix D_in + D_out
-print "adjMat_undir\n", adjMat_undir
+adjMat_dir = [[1, 0, 0, 1,],
+              [0, 0, 0, 0,], 
+              [0, 0, 0, 0,],
+              [0, 0, 0, 0,]]
+D_in = [[1, 0, 0, 0,],
+        [0, 0, 0, 0,],
+        [0, 0, 0, 0,],
+        [0, 0, 0, 1,]]
+D_out = [[2, 0, 0, 0,], 
+         [0, 0, 0, 0,], 
+         [0, 0, 0, 0,], 
+         [0, 0, 0, 0,]]
+D = [[3, 0, 0, 0,],
+     [0, 0, 0, 0,],
+     [0, 0, 0, 0,],
+     [0, 0, 0, 1,]]
+adjMat_undir = [[1, 0, 0, 1,],
+                [0, 0, 0, 0,],
+                [0, 0, 0, 0,],
+                [1, 0, 0, 0,]]
+#print "adjMat_dir\n", adjMat_dir # adjancency matrix
+#print "D_in\n", D_in # diagonal degree matrix for incoming edges
+#print "D_out\n", D_out # diagonal degree matrix for outgoing edges
+#print "D\n", D # diagonal degree matrix D_in + D_out
+#print "adjMat_undir\n", adjMat_undir
+def generateFeatureMatrix(adjMat, D):
+  for index1 in range(0, len(adjMat)):
+    featureMatrix = []
+    adjNodes = getAdjacentNode(adjMat, index1)
+    print "adj node indexex of", index1, ":", adjNodes
+    degreeNode = getDegreeNode(D, index1)
+    print "degree of node", index1, ":", degreeNode
+    featureMatrix.append([degreeNode])
+    vectorPrevious = featureMatrix[len(featureMatrix) - 1][:]
+    print "processing adj nodes:"
+    for index2 in range(0, len(adjNodes)):
+      print "  adj node index", adjNodes[index2]
+      vectorPreviousToAppend = vectorPrevious[:]
+      nodeDegree = getDegreeNode(D, adjNodes[index2])
+      print "  degree of node", nodeDegree
+      vectorPreviousToAppend.append(nodeDegree)
+      featureMatrix.append(vectorPreviousToAppend)
+    print "  ", featureMatrix
 
-def generateFeatureMatrix(featureMatrix, ):
-  
-
-for index1 in range(0, len(adjMat_undir)):
-  featureMatrix = []
-  print "\nnode index", index1
-  adjNodes = getAdjacentNode(adjMat_undir, index1)
-  print "adj nodes indexes", adjNodes
-  degreeNode = getDegreeNode(D, index1)
-  print "degree of node", degreeNode
-  featureMatrix.append([degreeNode])
-  vectorPrevious = featureMatrix[len(featureMatrix) - 1][:]
-  for index2 in range(0, len(adjNodes)):
-    vectorPreviousToAppend = vectorPrevious[:]
-    vectorPreviousToAppend.append(getDegreeNode(D, index2))
-    featureMatrix.append(vectorPreviousToAppend)
-  print featureMatrix
-  break
+generateFeatureMatrix(adjMat_undir, D)
