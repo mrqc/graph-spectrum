@@ -1,53 +1,81 @@
 import numpy as np
+
+from scipy import stats
+
 import matplotlib.pyplot as plt
 import matplotlib.figure
 from matplotlib.mlab import PCA
-from scipy import stats
-
-node1 = [[18, 17, 16, 15], [5, 5, 5, 5]]
-node2 = [[10,  9,  8,  7,  6,  5,  4], [1, 1]]
+import graphgenerate
+import graphfeature
 
 def softmax(x):
   eX = np.exp(x - np.max(x))
   return eX / eX.sum()
 
-x1 = [1, 2, 3, 4, 5]
-x2 = [1, 2, 3, 4, 5, 6, 7]
+adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(6, 6)
+nodes = []
+nodesSoftmax = []
+maxNodes = 0
+for matrix in graphfeature.generateFeatureMatrix(adjMat_undir, D):
+  print matrix
+  nodes.append([])
+  nodesSoftmax.append([])
+  for vector in matrix:
+    vector = np.sort(vector)[::-1]
+    nodesSoftmax[len(nodes) - 1].append(softmax(vector))
+    nodes[len(nodes) - 1].append(vector)
+    if len(nodes[len(nodes) - 1]) > maxNodes:
+      maxNodes = len(nodes[len(nodes) - 1])
+print nodesSoftmax
+quit()
 
 
-print np.array(np.random.randint(10,size=(10,3)))
+length = 0
+if maxNodes > len(nodes):
+  length = np.ceil(np.sqrt(maxNodes))
+else:
+  length = np.ceil(np.sqrt(len(nodes)))
+plt.figure()
+for ind1 in range(0, len(nodesSoftmax)):
+  plt.subplot(length, length, ind1 + 1)
+  plt.ylim((0, 1))
+  plt.xlim((0, 1))
+  for ind2 in range(0, len(nodesSoftmax[ind1])):
+    plt.plot(np.arange(0, len(nodesSoftmax[ind1][ind2])), nodesSoftmax[ind1][ind2], '-o', markersize=4)
+plt.show()
 
-#print np.array(node1)
-#print PCA(np.array([[1,2,3,4],[3,4,5,6],[1,2,2,2],[3,4,1,2],[4,6,5,5]]))
-#quit()
-#pcaY1 = PCA(np.array(node1))
-#pcaY2 = PCA(np.array(node2))
+quit()
+minLen1 = np.ndarray.min(np.array([len(node1[0]), len(node2[0])]))
+minLen2 = np.ndarray.min(np.array([len(node1[1]), len(node2[1])]))
 
-softmaxY1 = softmax(node1[0])
-softmaxY2 = softmax(node1[1])
-softmaxY3 = softmax(node2[0])
-softmaxY4 = softmax(node2[1])
+softmaxY1 = softmax(node1[0][0:minLen1])
+softmaxY2 = softmax(node1[1][0:minLen2])
+softmaxY3 = softmax(node2[0][0:minLen1])
+softmaxY4 = softmax(node2[1][0:minLen2])
 
-plt.style.use("seaborn-whitegrid")
+X1 = np.arange(0, minLen1)
+X2 = np.arange(0, minLen2)
+X3 = np.arange(0, minLen1)
+X4 = np.arange(0, minLen2)
+
+#plt.style.use("seaborn-whitegrid")
 plt.figure()
 
-plt.subplot(211)
-plt.plot(np.arange(0, len(node1[0])), softmaxY1, 'o', markersize=4)
-plt.plot(np.arange(0, len(node1[1])), softmaxY2, 'o', markersize=4)
+plt.subplot(4, 4, 1)
+plt.plot(X1, softmaxY1, '-o', markersize=4)
+plt.plot(X2, softmaxY2, '-o', markersize=4)
 
-plt.subplot(212)
-plt.plot(np.arange(0, len(node2[0])), softmaxY3, 'o', markersize=4)
-plt.plot(np.arange(0, len(node2[1])), softmaxY4, 'o', markersize=4)
+plt.subplot(4, 4, 2)
+plt.plot(X3, softmaxY3, '-o', markersize=4)
+plt.plot(X4, softmaxY4, '-o', markersize=4)
 
-#print stats.kstest(node1[0], 'norm')
 print ""
 print ""
 print "if statistic is small or pvalue high, then F(x)=G(x)"
+print ""
 print "ks test for decreasing distri"
-print softmaxY1, softmaxY3
 print stats.ks_2samp(softmaxY1, softmaxY3)
+print ""
 print "ks test for stable distri"
-print softmaxY2, softmaxY4
 print stats.ks_2samp(softmaxY2, softmaxY4)
 
-plt.show()
