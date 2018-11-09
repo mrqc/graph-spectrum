@@ -41,19 +41,6 @@ def generateFeatureMatrix(adjMat, D):
     matrix.append(featureVector)
   return matrix
 
-#  for index1 in range(0, len(adjMat)):
-#    featureMatrix = []
-#    adjNodes = getAdjacentNode(adjMat, index1)
-#    degreeNode = getDegreeNode(D, index1)
-#    featureMatrix.append([degreeNode])
-#    vectorPrevious = featureMatrix[len(featureMatrix) - 1][:]
-#    for index2 in range(0, len(adjNodes)):
-#      vectorPreviousToAppend = vectorPrevious[:]
-#      nodeDegree = getDegreeNode(D, adjNodes[index2])
-#      vectorPreviousToAppend.append(nodeDegree)
-#      featureMatrix.append(vectorPreviousToAppend)
-#    yield featureMatrix
-
 maxDepth = 2
 
 def getFeatureMatrixOfNode(adjMat, D, index, depth, processedNodes):
