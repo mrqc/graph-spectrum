@@ -59,6 +59,15 @@ def getFeatureMatrixOfNode(adjMat, D, index, depth, processedNodes):
       matrix.append(newNodeDegree)
   return matrix
 
+def processMatrix(ele, vec, matrix):
+  for ind in range(0, len(ele)):
+    if not isinstance(ele[ind], list):
+      #print vec + [ele[ind]]
+      vec = vec + [ele[ind]]
+      matrix.append(vec)
+    else:
+      processMatrix(ele[ind], vec, matrix)
+
 if __name__ == "__main__":
   adjMat_dir = [[1, 0, 0, 1,],
                 [0, 0, 0, 0,], 
@@ -80,11 +89,20 @@ if __name__ == "__main__":
                   [0, 0, 0, 0,],
                   [0, 0, 0, 0,],
                   [1, 0, 0, 0,]]
-  #adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(4, 4)
+  adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(4, 4)
   #print "adjMat_dir\n", adjMat_dir # adjancency matrix
   #print "D_in\n", D_in # diagonal degree matrix for incoming edges
   #print "D_out\n", D_out # diagonal degree matrix for outgoing edges
   #print "D\n", D # diagonal degree matrix D_in + D_out
   print "adjMat_undir\n", adjMat_undir
-
-  pprint.PrettyPrinter(indent=4).pprint(generateFeatureMatrix(adjMat_undir, D))
+  featureMatrix = generateFeatureMatrix(adjMat_undir, D)
+  print featureMatrix
+  print "----"
+  for featureIndex in range(0, len(featureMatrix)):
+    matrix = []
+    finishedMatrix = []
+    processMatrix(featureMatrix[featureIndex], [], matrix)
+    for vec in matrix:
+      if len(vec) == maxDepth + 1:
+        finishedMatrix.append(sorted(vec, reverse = True))
+    print finishedMatrix
