@@ -16,7 +16,9 @@ def adjFun(x, y):
 
 def generateRandomGraph(x, y):
   adjMat_dir = numpy.fromfunction(adjFun, (x, y))
-  (D_in, D_out, D) = graphfeature.degrees(adjMat_dir)
+  for index in range(0, len(adjMat_dir)):
+    adjMat_dir[index][index] = 0
   adjMat_undir = graphfeature.getUndirectedAdj(adjMat_dir)
+  (D_in, D_out, D) = graphfeature.degrees(adjMat_dir, adjMat_undir)
   return adjMat_dir, D_in, D_out, D, adjMat_undir
 

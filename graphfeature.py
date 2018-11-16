@@ -2,16 +2,19 @@ import graphgenerate
 import numpy
 import pprint
 
-def degrees(adjMat):
-  D_in = numpy.zeros((len(adjMat), len(adjMat)))
-  D_out = numpy.zeros((len(adjMat), len(adjMat)))
-  I = numpy.identity(len(adjMat))
-  for nodeIndex in range(0, len(adjMat)):
-    adjV1 = adjMat[nodeIndex]
-    adjV2 = numpy.transpose(adjMat)[nodeIndex]
+def degrees(adjMat_dir, adjMat_undir):
+  D_in = numpy.zeros((len(adjMat_dir), len(adjMat_dir)))
+  D_out = numpy.zeros((len(adjMat_dir), len(adjMat_dir)))
+  D = numpy.zeros((len(adjMat_undir), len(adjMat_undir)))
+  I = numpy.identity(len(adjMat_dir))
+  for nodeIndex in range(0, len(adjMat_dir)):
+    adjV1 = adjMat_dir[nodeIndex]
+    adjV2 = numpy.transpose(adjMat_dir)[nodeIndex]
     D_out[nodeIndex][nodeIndex] = int(numpy.sum(adjV1))
     D_in[nodeIndex][nodeIndex] = int(numpy.sum(adjV2))
-  D = numpy.add(D_in, D_out)
+  for nodeIndex in range(0, len(adjMat_undir)):
+    adjV = adjMat_undir[nodeIndex]
+    D[nodeIndex][nodeIndex] = int(numpy.sum(adjV))
   return D_in, D_out, D
 
 def getAdjacentNode(adjMat, nodeIndex):
@@ -68,41 +71,4 @@ def processMatrix(ele, vec, matrix):
     else:
       processMatrix(ele[ind], vec, matrix)
 
-if __name__ == "__main__":
-  adjMat_dir = [[1, 0, 0, 1,],
-                [0, 0, 0, 0,], 
-                [0, 0, 0, 0,],
-                [0, 0, 0, 0,]]
-  D_in = [[1, 0, 0, 0,],
-          [0, 0, 0, 0,],
-          [0, 0, 0, 0,],
-          [0, 0, 0, 1,]]
-  D_out = [[2, 0, 0, 0,], 
-           [0, 0, 0, 0,], 
-           [0, 0, 0, 0,], 
-           [0, 0, 0, 0,]]
-  D = [[3, 0, 0, 0,],
-       [0, 0, 0, 0,],
-       [0, 0, 0, 0,],
-       [0, 0, 0, 1,]]
-  adjMat_undir = [[1, 0, 0, 1,],
-                  [0, 0, 0, 0,],
-                  [0, 0, 0, 0,],
-                  [1, 0, 0, 0,]]
-  adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(4, 4)
-  #print "adjMat_dir\n", adjMat_dir # adjancency matrix
-  #print "D_in\n", D_in # diagonal degree matrix for incoming edges
-  #print "D_out\n", D_out # diagonal degree matrix for outgoing edges
-  #print "D\n", D # diagonal degree matrix D_in + D_out
-  print "adjMat_undir\n", adjMat_undir
-  featureMatrix = generateFeatureMatrix(adjMat_undir, D)
-  print featureMatrix
-  print "----"
-  for featureIndex in range(0, len(featureMatrix)):
-    matrix = []
-    finishedMatrix = []
-    processMatrix(featureMatrix[featureIndex], [], matrix)
-    for vec in matrix:
-      if len(vec) == maxDepth + 1:
-        finishedMatrix.append(sorted(vec, reverse = True))
-    print finishedMatrix
+
