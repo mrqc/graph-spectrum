@@ -38,7 +38,7 @@ def getUndirectedAdj(directedAdjMat):
 def generateFeatureMatrix(adjMat, D):
   matrix = []
   for nodeIndex in range(0, len(adjMat)):
-    print "processing node " + str(nodeIndex)
+#    print "processing node " + str(nodeIndex)
     processedNodes = []
     featureVector = getFeatureMatrixOfNode(adjMat, D, nodeIndex, 0,  processedNodes)
     matrix.append(featureVector)
@@ -48,11 +48,11 @@ maxDepth = 2
 
 def getFeatureMatrixOfNode(adjMat, D, index, depth, processedNodes):
   if depth > maxDepth:# or index in processedNodes:
-    print "not performing " + str(index) + " in " + str(depth)
+#    print "not performing " + str(index) + " in " + str(depth)
     return None
-  print "features of node index: " + str(index) + " in depth " + str(depth)
+#  print "features of node index: " + str(index) + " in depth " + str(depth)
   adjNodes = getAdjacentNode(adjMat, index)
-  print adjNodes
+#  print adjNodes
   degreeNode = getDegreeNode(D, index)
   processedNodes.append(index)
   matrix = [degreeNode]
