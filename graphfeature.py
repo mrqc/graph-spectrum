@@ -47,7 +47,7 @@ def generateFeatureMatrix(adjMat, D):
 maxDepth = 2
 
 def getFeatureMatrixOfNode(adjMat, D, index, depth, processedNodes):
-  if depth > maxDepth:# or index in processedNodes:
+  if depth > maxDepth or index in processedNodes:
 #    print "not performing " + str(index) + " in " + str(depth)
     return None
 #  print "features of node index: " + str(index) + " in depth " + str(depth)
