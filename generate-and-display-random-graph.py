@@ -19,8 +19,8 @@ def compare(node1Features, node2Features):
   plt.xlabel("statistic (should be low)")
   plt.ylabel("pvalue (should be high)")
   axes = plt.gca()
-  axes.set_xlim([0, 1.1])
-  axes.set_ylim([0, 1.1])
+  axes.set_xlim([0, 1])
+  axes.set_ylim([0, 1])
   xValues = []
   yValues = []
   font = { "family": "sans-serif", "size": 10 }
@@ -31,9 +31,11 @@ def compare(node1Features, node2Features):
     distsIndexes = []
     print "-" * 20
     for index2 in range(0, len(node2Features)):
-      test = stats.ks_2samp(node1Features[index1], node2Features[index2])
-      print "compareing vector " + str(index1) + " with " + str(index2)
-      print node1Features[index1], node2Features[index2], test
+      v1 = numpy.log(node1Features[index1])
+      v2 = numpy.log(node2Features[index2])
+      test = stats.stats.ttest_ind(v1, v2)
+      print "comparing vector " + str(index1) + " with " + str(index2)
+      print ['{0:.5f}'.format(_) for _ in v1], "\n", ['{0:.5f}'.format(_) for _ in v2], "\n", test
       plt.plot([test.statistic], [test.pvalue], color="red", marker="o", markersize=8 - 1 * index1, alpha=0.5)
       normVector = (0, 1)
       dist = euclideanDist(normVector, (test.statistic, test.pvalue))
@@ -49,8 +51,8 @@ def compare(node1Features, node2Features):
     # maxIndex now best choice
     if maxIndex != -1:
       indexesUsed.append(maxIndex)
-      print "best is " + str(index1) + " " + str(index2)
-      bestIndexes.append((index1, index2))
+      print "best is " + str(index1) + " " + str(maxIndex)
+      bestIndexes.append((index1, maxIndex))
   return bestIndexes
 
 def euclideanDist(v1, v2):
@@ -161,7 +163,7 @@ if __name__ == "__main__":
   for matrix in finishedMatrix:
     softmaxMatrix.append([])
     for vector in matrix:
-      softmaxMatrix[len(softmaxMatrix) - 1].append(graphkstest.softmax(vector))
+      softmaxMatrix[len(softmaxMatrix) - 1].append(vector)
 
 #  print "softmax matrix"
 #  print softmaxMatrix
@@ -170,8 +172,10 @@ if __name__ == "__main__":
   #for index1 in range(0, len(softmaxMatrix)):
   #  for index2 in range(index1 + 1, len(softmaxMatrix)):
   #    compare(softmaxMatrix[index1], softmaxMatrix[index2])
-  indexes = compare(softmaxMatrix[0], softmaxMatrix[13])
-  print indexes
+  indexes1 = compare(softmaxMatrix[0], softmaxMatrix[13])
+  indexes2 = compare(softmaxMatrix[0], softmaxMatrix[14])
+  print indexes1
+  print indexes2
 
 
   plt.show()
