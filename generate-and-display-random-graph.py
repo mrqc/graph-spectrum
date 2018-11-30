@@ -11,6 +11,14 @@ from scipy.spatial import distance
 from scipy import stats
 import matplotlib.cm as cm
 
+def sqr(v1, v2):
+  error = 0
+  if len(v1) != len(v2):
+    raise Exception("Length not equal")
+  for index in range(0, len(v1)):
+    error = error + numpy.power(v1[index] - v2[index], 2)
+  return error / float(len(v1))
+
 def compare(node1Features, node2Features):
   print "comparing -------------------------"
   print node1Features, node2Features
@@ -20,7 +28,7 @@ def compare(node1Features, node2Features):
   plt.ylabel("pvalue (should be high)")
   axes = plt.gca()
   axes.set_xlim([0, 1])
-  axes.set_ylim([0, 1])
+  #axes.set_ylim([0, 1])
   xValues = []
   yValues = []
   font = { "family": "sans-serif", "size": 10 }
@@ -33,12 +41,21 @@ def compare(node1Features, node2Features):
     for index2 in range(0, len(node2Features)):
       v1 = numpy.log(node1Features[index1])
       v2 = numpy.log(node2Features[index2])
-      test = stats.stats.ttest_ind(v1, v2)
-      print "comparing vector " + str(index1) + " with " + str(index2)
-      print ['{0:.5f}'.format(_) for _ in v1], "\n", ['{0:.5f}'.format(_) for _ in v2], "\n", test
-      plt.plot([test.statistic], [test.pvalue], color="red", marker="o", markersize=8 - 1 * index1, alpha=0.5)
-      normVector = (0, 1)
-      dist = euclideanDist(normVector, (test.statistic, test.pvalue))
+      #print "comparing vector " + str(index1) + " with " + str(index2)
+      #test = stats.stats.ttest_ind(v1, v2)
+      #plt.plot([test.statistic], [test.pvalue], color="red", marker="o", markersize=8 - 1 * index1, alpha=0.5)
+      test = sqr(v1, v2)
+      #print node1Features[index1]
+      #print node2Features[index2]
+      #print ['{0:.5f}'.format(_) for _ in v1]
+      #print ['{0:.5f}'.format(_) for _ in v2]
+      #print test
+      print node1Features[index1], node2Features[index2], test
+      plt.plot(index1, test, color="red", marker="o", markersize=8 - 1 * index1, alpha=0.5)
+
+      #normVector = (0, 1)
+      #dist = euclideanDist(normVector, (test.statistic, test.pvalue))
+      dist = test
       dists.append(dist)
       distsIndexes.append((index1, index2))
       #plt.text(test.statistic, test.pvalue + index1 * 0.08 + index2 * 0.08, str(index1) + "-" + str(index2), fontdict=font)
