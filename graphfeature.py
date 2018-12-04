@@ -53,7 +53,9 @@ def getFeatureMatrixOfNode(adjMat, D, index, depth, processedNodes):
 #  print "features of node index: " + str(index) + " in depth " + str(depth)
   adjNodes = getAdjacentNode(adjMat, index)
 #  print adjNodes
+#  print adjNodes
   degreeNode = getDegreeNode(D, index)
+#  print degreeNode
   processedNodes.append(index)
   matrix = [degreeNode]
   for indexAdj in range(0, len(adjNodes)):

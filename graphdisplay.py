@@ -23,5 +23,5 @@ def renderGraphFromAdj(adjMat):
   nx.draw_networkx_edges(graph, pos, edgelist=graph.edges, width=1.0, alpha=0.5)
   labels = {}
   for index in range(0, len(adjMat)):
-    labels[index] = "          " + str(index)
+    labels[index] = str(index)
   nx.draw_networkx_labels(graph, pos, labels)
