@@ -40,11 +40,11 @@ def generateFeatureMatrix(adjMat, D):
   for nodeIndex in range(0, len(adjMat)):
 #    print "processing node " + str(nodeIndex)
     processedNodes = []
-    featureVector = getFeatureMatrixOfNode(adjMat, D, nodeIndex, 0,  processedNodes)
-    matrix.append(featureVector)
+    featureMatrix = getFeatureMatrixOfNode(adjMat, D, nodeIndex, 0,  processedNodes)
+    matrix.append(featureMatrix)
   return matrix
 
-maxDepth = 4
+maxDepth = 2
 
 def getFeatureMatrixOfNode(adjMat, D, index, depth, processedNodes):
   if depth > maxDepth:# or index in processedNodes:

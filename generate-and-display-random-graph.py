@@ -14,12 +14,10 @@ import matplotlib.cm as cm
 def sqr(v1, v2):
   error = 0
   if len(v1) != len(v2):
-    print v1
-    print v2
     raise Exception("Length not equal")
   for index in range(0, len(v1)):
-    error = error + numpy.power(v1[index] - v2[index], 2)
-  return error / float(len(v1))
+    error = error + numpy.power(numpy.absolute(v1[index] - v2[index]), graphfeature.maxDepth - index + 1)
+  return error # / float(len(v1))
 
 def compare(node1Features, node2Features):
   #print "comparing -------------------------"
@@ -41,6 +39,7 @@ def compare(node1Features, node2Features):
       return [(0, 0, numpy.inf)]
   elif node2Features[0][0] == 0:
     return [(0, 0, numpy.inf)]
+
   indexesUsed = []
   bestIndexes = []
   for index1 in range(0, len(node1Features)):
@@ -53,6 +52,7 @@ def compare(node1Features, node2Features):
       #test = stats.stats.ttest_ind(v1, v2)
       #plt.plot([test.statistic], [test.pvalue], color="red", marker="o", markersize=8 - 1 * index1, alpha=0.5)
       test = sqr(v1, v2)
+      print v1, v2
       #print node1Features[index1]
       #print node2Features[index2]
       #print ['{0:.5f}'.format(_) for _ in v1]
@@ -68,11 +68,16 @@ def compare(node1Features, node2Features):
       #plt.text(test.statistic, test.pvalue + index1 * 0.08 + index2 * 0.08, str(index1) + "-" + str(index2), fontdict=font)
       #plt.text(index1, test, str(index1) + "-" + str(index2), fontdict=font)
     maxIndex = -1
+#    if check:
+#      print dists
+    print dists
     for index in range(0, len(dists)):
       if maxIndex == -1 and index not in indexesUsed:
         maxIndex = index
       elif dists[maxIndex] > dists[index] and index not in indexesUsed:
         maxIndex = index
+#    if check:
+#      print maxIndex
     # maxIndex now best choice
     if maxIndex != -1:
       indexesUsed.append(maxIndex)
@@ -84,8 +89,7 @@ def euclideanDist(v1, v2):
   return distance.euclidean(v1, v2)
 
 if __name__ == "__main__":
-
-  adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(6, 6)
+  adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(7, 7)
 #  adjMat_undir = numpy.array([
 #   [0, 1, 0, 1, 1, 0],
 #   [1, 0, 1, 0, 0, 1],
@@ -120,11 +124,11 @@ if __name__ == "__main__":
 #    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
 #    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
 #    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0]])
-  adjMat_undir = numpy.array([
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0]])
+#  adjMat_undir = numpy.array([
+#    [0, 0, 0, 0],
+#    [0, 0, 0, 0],
+#    [0, 0, 0, 0],
+#    [0, 0, 0, 0]])
 
 #  
 #  D = numpy.array([
@@ -147,11 +151,11 @@ if __name__ == "__main__":
 #    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
 #    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]])
 
-  D = numpy.array([
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0]])
+#  D = numpy.array([
+#    [0, 0, 0, 0],
+#    [0, 0, 0, 0],
+#    [0, 0, 0, 0],
+#    [0, 0, 0, 0]])
 
 #
 #  print "adjMat_dir"
@@ -217,10 +221,21 @@ if __name__ == "__main__":
     diffVal = diffVal / len(v)
     return diffVal
 
-  for index1 in range(0, len(softmaxMatrix)):
-    for index2 in range(index1 + 1, len(softmaxMatrix)):
-      indexes = compare(softmaxMatrix[index1], softmaxMatrix[index2])
-      print str(index1) + " vs " + str(index2) + ": " + str(diff(indexes))
+#  for index1 in range(0, len(softmaxMatrix)):
+#    for index2 in range(0, len(softmaxMatrix)):
+#      indexes = compare(softmaxMatrix[index1], softmaxMatrix[index2])
+#      difference = diff(indexes)
+#      if index1 == index2 and difference != 0:
+#        print "-"
+#        print softmaxMatrix[index1]
+#        print softmaxMatrix[index2]
+#        print "-"
+#      print str(index1) + " vs " + str(index2) + ": " + str(difference)
+  indexes01 = compare(softmaxMatrix[0], softmaxMatrix[1])
+  print "-" * 20
+  indexes10 = compare(softmaxMatrix[1], softmaxMatrix[0])
+  print indexes01
+  print indexes10
 
   #indexes1 = compare(softmaxMatrix[0], softmaxMatrix[13])
   #indexes2 = compare(softmaxMatrix[0], softmaxMatrix[14])

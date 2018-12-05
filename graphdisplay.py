@@ -17,9 +17,10 @@ def renderDiGraphFromAdj(adjMat):
 
 def renderGraphFromAdj(adjMat):
   graph = nx.Graph(adjMat)
-  pos = nx.spring_layout(graph)
+  pos = nx.spring_layout(graph, k=400)
   #nx.draw(graph, cmap = plt.get_cmap('jet'))
-  nx.draw_networkx_nodes(graph, pos, nodelist=graph.nodes, node_size=np.empty(len(graph.nodes)).fill(100))
+  #nx.draw_networkx_nodes(graph, pos, nodelist=graph.nodes, node_size=np.empty(len(graph.nodes)).fill(50))
+  nx.draw_networkx_nodes(graph, pos, nodelist=graph.nodes, node_size=400)
   nx.draw_networkx_edges(graph, pos, edgelist=graph.edges, width=1.0, alpha=0.5)
   labels = {}
   for index in range(0, len(adjMat)):
