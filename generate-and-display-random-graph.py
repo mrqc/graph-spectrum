@@ -145,11 +145,11 @@ if __name__ == "__main__":
         if vec[0] == 0:
           finishedMatrix[len(finishedMatrix) - 1].append([0])
 
-  softmaxMatrix = []
+  normalizedMatrix = []
   for matrix in finishedMatrix:
-    softmaxMatrix.append([])
+    normalizedMatrix.append([])
     for vector in matrix:
-      softmaxMatrix[len(softmaxMatrix) - 1].append(vector)
+      normalizedMatrix[len(normalizedMatrix) - 1].append(vector)
 
   def diff(v):
     diffVal = 0
@@ -159,9 +159,9 @@ if __name__ == "__main__":
     return diffVal
 
   pairs = []
-  for index1 in range(0, len(softmaxMatrix)):
-    for index2 in range(0, len(softmaxMatrix)):
-      cVal = compare(softmaxMatrix[index1], softmaxMatrix[index2])
+  for index1 in range(0, len(normalizedMatrix)):
+    for index2 in range(0, len(normalizedMatrix)):
+      cVal = compare(normalizedMatrix[index1], normalizedMatrix[index2])
       pairs.append((index1, index2, cVal[1]))
 
   pairs.sort(key=lambda x: x[2], reverse=False)
