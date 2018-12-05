@@ -3,9 +3,9 @@ import graphfeature
 
 def adjFun(x, y):
   ret = numpy.empty((x.shape[0], y.shape[1]))
-  threshold = 2
+  threshold = 0
   for xIndex in range(0, x.shape[0]):
-    threshold = 0.6 + numpy.random.poisson()
+    threshold = 1.1 + numpy.random.poisson()
     for yIndex in range(0, y.shape[1]):
       val = numpy.random.normal()
       if numpy.absolute(val) >= threshold:

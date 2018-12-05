@@ -11,6 +11,8 @@ from scipy.spatial import distance
 from scipy import stats
 import matplotlib.cm as cm
 
+nodeCount = 10
+
 def sqr(v1, v2):
   error = 0
   if len(v1) != len(v2):
@@ -44,11 +46,11 @@ def comparePart(node1Features, node2Features):
 def compare(node1Features, node2Features):
   if node1Features[0][0] == 0:
     if node2Features[0][0] == 0:
-      return [(0, 0, 0)]
+      return ([(0, 0)], 0)
     else:
-      return [(0, 0, numpy.inf)]
+      return ([(0, 0)], numpy.inf)
   elif node2Features[0][0] == 0:
-    return [(0, 0, numpy.inf)]
+    return ([(0, 0)], numpy.inf)
   indexes1 = comparePart(node1Features, node2Features)
   indexes2 = comparePart(node2Features, node1Features)
   diff1 = diff(indexes1)
@@ -59,7 +61,7 @@ def euclideanDist(v1, v2):
   return distance.euclidean(v1, v2)
 
 if __name__ == "__main__":
-  adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(7, 7)
+  adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(nodeCount, nodeCount)
 #  adjMat_undir = numpy.array([
 #   [0, 1, 0, 1, 1, 0],
 #   [1, 0, 1, 0, 0, 1],
@@ -168,6 +170,8 @@ if __name__ == "__main__":
   for pair in pairs:
     if pair[0] != pair[1]:
       print pair[0], "vs.", pair[1], "=", pair[2]
+    if pair[2] > 2:
+      break
 
   plt.show()
 
