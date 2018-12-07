@@ -46,11 +46,11 @@ def comparePart(node1Features, node2Features):
 def compare(node1Features, node2Features):
   if node1Features[0][0] == 0:
     if node2Features[0][0] == 0:
-      return ([(0, 0)], 0)
+      return ([(0.0, 0.0)], 0.0)
     else:
-      return ([(0, 0)], numpy.inf)
+      return ([(0.0, 0.0)], numpy.inf)
   elif node2Features[0][0] == 0:
-    return ([(0, 0)], numpy.inf)
+    return ([(0.0, 0.0)], numpy.inf)
   indexes1 = comparePart(node1Features, node2Features)
   indexes2 = comparePart(node2Features, node1Features)
   diff1 = diff(indexes1)
@@ -162,7 +162,7 @@ if __name__ == "__main__":
 
   pairs = []
   for index1 in range(0, len(normalizedMatrix)):
-    for index2 in range(0, len(normalizedMatrix)):
+    for index2 in range(index1 + 1, len(normalizedMatrix)):
       cVal = compare(normalizedMatrix[index1], normalizedMatrix[index2])
       pairs.append((index1, index2, cVal[1]))
 
