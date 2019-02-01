@@ -15,7 +15,7 @@ import sys
 warnings.simplefilter("ignore")
 nodeCount = 10
 
-def sqr(v1, v2):
+def sqrUndir(v1, v2):
   error = 0
   if len(v1) != len(v2):
     raise Exception("Length not equal")
@@ -45,13 +45,9 @@ def compareUndirPart(node1Features, node2Features):
       #print node2Features[index2]
       v1 = numpy.log(node1Features[index1])
       v2 = numpy.log(node2Features[index2])
-      for index in range(0, len(v1)):
-        if v1[index] == numpy.NINF:
-          v1[index] = 0
-      for index in range(0, len(v2)):
-        if v2[index] == numpy.NINF:
-          v2[index] = 0
-      test = sqr(v1, v2)
+      cleanInfValues(v1)
+      cleanInfValues(v2)
+      test = sqrUndir(v1, v2)
       dist = test
       dists.append(dist)
     maxIndex = -1
@@ -65,26 +61,32 @@ def compareUndirPart(node1Features, node2Features):
       bestIndexes.append((index1, maxIndex, dists[maxIndex]))
   return bestIndexes
 
+def cleanInfValues(v):
+  for index in range(0, len(v)):
+    if v[index] == numpy.NINF:
+      v[index] = 0
+
 def compareDirPart(node1InFeatures, node2InFeatures, node1OutFeatures, node2OutFeatures):
-#TODO
   indexesUsed = []
   bestIndexes = []
-  for index1 in range(0, len(node1Features)):
-    dists = []
-    for index2 in range(0, len(node2Features)):
-      #print node1Features[index1]
-      #print node2Features[index2]
-      v1 = numpy.log(node1Features[index1])
-      v2 = numpy.log(node2Features[index2])
-      for index in range(0, len(v1)):
-        if v1[index] == numpy.NINF:
-          v1[index] = 0
-      for index in range(0, len(v2)):
-        if v2[index] == numpy.NINF:
-          v2[index] = 0
-      test = sqr(v1, v2)
-      dist = test
-      dists.append(dist)
+  for index1 in range(0, len(node1InFeatures)):
+    for index2 in range(0, len(node2InFeatures)):
+      for index3 in range(0, len(node1OutFeatures)):
+        dists = []
+        for index4 in range(0, len(node2OutFeatures)):
+          #print node1Features[index1]
+          #print node2Features[index2]
+          v1 = numpy.log(node1InFeatures[index1])
+          v2 = numpy.log(node2InFeatures[index2])
+          v3 = numpy.log(node1OutFeatures[index3])
+          v4 = numpy.log(node2OutFeatures[index4])
+          cleanInfValues(v1)
+          cleanInfValues(v2)
+          cleanInfValues(v3)
+          cleanInfValues(v4)
+          test = sqrDir(v1, v2, v3, v4)
+          dist = test
+          dists.append(dist)
     maxIndex = -1
     for index in range(0, len(dists)):
       if maxIndex == -1 and index not in indexesUsed:
@@ -131,8 +133,6 @@ def compareDir(node1InFeatures, node2InFeatures, node1OutFeatures, node2OutFeatu
 
   indexes = []
   indexes.append(compareDirPart(node1InFeaturesLocal, node2InFeaturesLocal, node1OutFeaturesLocal, node2OutFeaturesLocal))
-  indexes.append(compareDirPart(node2InFeaturesLocal, node1InFeaturesLocal, node1OutFeaturesLocal, node2OutFeaturesLocal))
-  indexes.append(compareDirPart(node1InFeaturesLocal, node2InFeaturesLocal, node2OutFeaturesLocal, node1OutFeaturesLocal))
   indexes.append(compareDirPart(node2InFeaturesLocal, node1InFeaturesLocal, node2OutFeaturesLocal, node1OutFeaturesLocal))
   
   diffMin = None
