@@ -35,7 +35,7 @@ def ppArray(a, depth=0):
     else:
       print ' ' * (depth * 3), str(ele) + ","
 
-def comparePart(node1Features, node2Features):
+def compareUndirPart(node1Features, node2Features):
   indexesUsed = []
   bestIndexes = []
   for index1 in range(0, len(node1Features)):
@@ -65,26 +65,88 @@ def comparePart(node1Features, node2Features):
       bestIndexes.append((index1, maxIndex, dists[maxIndex]))
   return bestIndexes
 
-def compare(node1Features, node2Features):
-  if node1Features[0][0] == 0:
-    if node2Features[0][0] == 0:
-      return ([(0.0, 0.0)], 0.0)
-    else:
-      return ([(0.0, 0.0)], numpy.inf)
+def compareDirPart(node1InFeatures, node2InFeatures, node1OutFeatures, node2OutFeatures):
+#TODO
+  indexesUsed = []
+  bestIndexes = []
+  for index1 in range(0, len(node1Features)):
+    dists = []
+    for index2 in range(0, len(node2Features)):
+      #print node1Features[index1]
+      #print node2Features[index2]
+      v1 = numpy.log(node1Features[index1])
+      v2 = numpy.log(node2Features[index2])
+      for index in range(0, len(v1)):
+        if v1[index] == numpy.NINF:
+          v1[index] = 0
+      for index in range(0, len(v2)):
+        if v2[index] == numpy.NINF:
+          v2[index] = 0
+      test = sqr(v1, v2)
+      dist = test
+      dists.append(dist)
+    maxIndex = -1
+    for index in range(0, len(dists)):
+      if maxIndex == -1 and index not in indexesUsed:
+        maxIndex = index
+      elif dists[maxIndex] > dists[index] and index not in indexesUsed:
+        maxIndex = index
+    if maxIndex != -1:
+      indexesUsed.append(maxIndex)
+      bestIndexes.append((index1, maxIndex, dists[maxIndex]))
+  return bestIndexes
+
+def compareUndir(node1Features, node2Features):
+  if node1Features[0][0] == 0 and node2Features[0][0] == 0:
+    return ([(0, 0)], 0.0)
   elif node2Features[0][0] == 0:
-    return ([(0.0, 0.0)], numpy.inf)
+    return ([(0, 0)], numpy.inf)
   length = len(node1Features[0]) if len(node1Features[0]) < len(node2Features[0]) else len(node2Features[0])
-  node1FeaturesLocal = node1Features
-  node2FeaturesLocal = node2Features
-  for index in range(0, len(node1FeaturesLocal)):
-    node1FeaturesLocal[index] = node1FeaturesLocal[index][0:length]
-  for index in range(0, len(node2FeaturesLocal)):
-    node2FeaturesLocal[index] = node2FeaturesLocal[index][0:length]
-  indexes1 = comparePart(node1FeaturesLocal, node2FeaturesLocal)
-  indexes2 = comparePart(node2FeaturesLocal, node1FeaturesLocal)
+  node1FeaturesLocal = cutMatrixElementsToLength(node1Features, length)
+  node2FeaturesLocal = cutMatrixElementsToLength(node2Features, length)
+
+  indexes1 = compareUndirPart(node1FeaturesLocal, node2FeaturesLocal)
+  indexes2 = compareUndirPart(node2FeaturesLocal, node1FeaturesLocal)
   diff1 = diff(indexes1)
   diff2 = diff(indexes2)
   return (indexes1, diff1) if diff1 < diff2 else (indexes2, diff2)
+
+def cutMatrixElementsToLength(nodeFeatures, length):
+  ret = []
+  for index in range(0, len(nodeFeatures)):
+    ret.append(nodeFeatures[index][0:length])
+  return ret
+
+def compareDir(node1InFeatures, node2InFeatures, node1OutFeatures, node2OutFeatures):
+  if node1InFeatures[0][0] == 0 and node1OutFeatures[0][0] == 0 and node2InFeatures[0][0] == 0 and node2OutFeatures[0][0] == 0:
+    return ([(0, 0)], 0.0)
+  elif node2Features[0][0] == 0:
+    return ([(0, 0)], numpy.inf)
+  lengthIn = len(node1InFeatures[0]) if len(node1InFeatures[0]) < len(node2InFeatures[0]) else len(node2InFeatures[0])
+  lengthOut = len(node1OutFeatures[0]) if len(node1OutFeatures[0]) < len(node2OutFeatures[0]) else len(node2OutFeatures[0])
+  node1InFeaturesLocal = cutMatrixElementsToLength(node1InFeatures, lengthIn)
+  node2InFeaturesLocal = CutMatrixElementsToLength(node2InFeatures, lengthIn)
+  node1OutFeaturesLocal = cutMatrixElementsToLength(node1OutFeatures, lengthOut)
+  node2OutFeaturesLocal = cutMatrixElementsToLength(node2OutFeatures, lengthOut)
+
+  indexes = []
+  indexes.append(compareDirPart(node1InFeaturesLocal, node2InFeaturesLocal, node1OutFeaturesLocal, node2OutFeaturesLocal))
+  indexes.append(compareDirPart(node2InFeaturesLocal, node1InFeaturesLocal, node1OutFeaturesLocal, node2OutFeaturesLocal))
+  indexes.append(compareDirPart(node1InFeaturesLocal, node2InFeaturesLocal, node2OutFeaturesLocal, node1OutFeaturesLocal))
+  indexes.append(compareDirPart(node2InFeaturesLocal, node1InFeaturesLocal, node2OutFeaturesLocal, node1OutFeaturesLocal))
+  
+  diffMin = None
+  indexMin = 0
+  for index in range(0, len(indexes)):
+    diff = diff(indexes[index])
+    if diffMin == None:
+      diffMin = diff
+      indexMin = index
+    else:
+      if diffMin > diff:
+        diffMin = diff
+        indexMin = index
+  return (indexMin, diffMin)
 
 def diff(v):
   diffVal = 0
@@ -101,8 +163,7 @@ def printPairs(pairs):
     if pair[0] != pair[1]:
       print pair[0], "vs.", pair[1], "=", pair[2]
 
-def calcDiffs(adjMat, DegMat):
-  featureMatrix = graphfeature.generateFeatureMatrix(adjMat, DegMat)
+def cleanFeatureMatrix(featureMatrix):
   finishedMatrix = []
   for featureIndex in range(0, len(featureMatrix)):
     finishedMatrix.append([])
@@ -119,22 +180,51 @@ def calcDiffs(adjMat, DegMat):
       elif len(vec) == 1:
         if vec[0] == 0:
           finishedMatrix[len(finishedMatrix) - 1].append([0])
-  normalizedMatrix = []
-  for matrix in finishedMatrix:
-    normalizedMatrix.append([])
-    for vector in matrix:
-      normalizedMatrix[len(normalizedMatrix) - 1].append(vector)
+  return finishedMatrix
+
+def calcDiffsUndir(adjMat, DegMat):
+  featureMatrix = graphfeature.generateFeatureMatrix(adjMat, DegMat)
+  finishedMatrix = cleanFeatureMatrix(featureMatrix)
+  normalizedMatrix = generateNormalizedMatrix(finishedMatrix)
 
   pairs = []
   keyPairs = {}
   for index1 in range(0, len(normalizedMatrix)):
     for index2 in range(index1 + 1, len(normalizedMatrix)):
-      cVal = compare(normalizedMatrix[index1], normalizedMatrix[index2])
+      cVal = compareUndir(normalizedMatrix[index1], normalizedMatrix[index2])
       pairs.append((index1, index2, cVal[1]))
       keyPairs[(index1, index2)] = cVal[1]
 
   pairs.sort(key=lambda x: x[2], reverse=False)
   return pairs, keyPairs
+
+def generateNormalizedMatrix(finishedMatrix):
+  normalizedMatrix = []
+  for matrix in finishedMatrix:
+    normalizedMatrix.append([])
+    for vector in matrix:
+      normalizedMatrix[len(normalizedMatrix) - 1].append(vector)
+  return normalizedMatrix
+
+def calcDiffsDir(adjMat, d_in, d_out):
+  featureMatrixIn = graphfeature.generateFeatureMatrix(adjMat, d_in)
+  featureMatrixOut = graphfeature.generateFeatureMatrix(adjMat, d_out)
+  finishedMatrixIn = cleanFeatureMatrix(featureMatrixIn)
+  finishedMatrixOut = cleanFeatureMatrix(featureMatrixOut)
+  normalizedMatrixIn = generateNormalizedMatrix(finishedMatrixIn)
+  normalizedMatrixOut = generateNormalizedMatrix(finishedMatrixOut)
+
+  pairs = []
+  keyPairs = {}
+  for index1 in range(0, len(normalizedMatrixIn)):
+    for index2 in range(index1 + 1, len(normalizedMatrixIn)):
+      cVal = compareDir(normalizedMatrixIn[index1], normalizedMatrixIn[index2], normalizedMatrixOut[index1], normalizedMatrixOut[index2])
+      pairs.append((index1, index2, cVal[1]))
+      keyPairs[(index1, index2)] = cVal[1]
+
+  pairs.sort(key=lambda x: x[2], reverse=False)
+  return pairs, keyPairs
+
 
 if __name__ == "__main__":
   adjMat_dir, D_in, D_out, D, adjMat_undir = graphgenerate.generateRandomGraph(nodeCount, nodeCount)
@@ -207,17 +297,14 @@ if __name__ == "__main__":
   plt.subplot(222)
   graphdisplay.renderGraphFromAdj(adjMat_undir)
   #undirected graph
-  pairs1, keyPairs1 = calcDiffs(adjMat_undir, D)
+  pairs1, keyPairs1 = calcDiffsUndir(adjMat_undir, D)
   print "Undirected Graph Differences between nodes"
   printPairs(pairs1)
 
   #directed graph
-  pairs2, keyPairs2 = calcDiffs(adjMat_dir, D_out)
-  pairs3, keyPairs3 = calcDiffs(adjMat_dir, D_in)
-  pairs4 = []
+  #pairs2, pairs3 = calcDiffsDir(adjMat_dir, D_in, D_out)
   #printPairs(pairs2)
-  #print "---"
-  #printPairs(pairs3)
+  #printPairs(pairs4)
   #for ele2 in pairs2:
   #  cVal1 = ele2[2]
   #  cVal2 = keyPairs3[(ele2[0], ele2[1])]
@@ -231,5 +318,5 @@ if __name__ == "__main__":
   #    x2 = pairs4[index2][2]
   #    y2 = pairs4[index2][3]
   #    print pairs4[index1][euclideanDist([x1, y1], [x2, y2])
-  #plt.show()
+  plt.show()
 
