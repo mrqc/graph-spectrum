@@ -13,7 +13,7 @@ import matplotlib.cm as cm
 import warnings
 import sys
 warnings.simplefilter("ignore")
-nodeCount = 10
+nodeCount = 25
 
 def sqrUndir(v1, v2):
   error = 0
@@ -307,7 +307,7 @@ if __name__ == "__main__":
   plt.subplot(221)
   graphdisplay.renderDiGraphFromAdj(adjMat_dir)
   plt.subplot(222)
-  graphdisplay.renderGraphFromAdj(adjMat_undir)
+  graphdisplay.renderUndirGraphFromAdj(adjMat_undir)
   #undirected graph
   pairs1, keyPairs1 = calcDiffsUndir(adjMat_undir, D)
   print "Undirected Graph Differences between nodes"
