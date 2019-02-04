@@ -23,6 +23,17 @@ def sqrUndir(v1, v2):
     error = error + numpy.power(numpy.absolute(v1[index] - v2[index]), graphfeature.maxDepth - index + 1)
   return error # / float(len(v1))
 
+def sqrDir(v1, v2, v3, v4):
+  errorIn = 0
+  errorOut = 0
+  if len(v1) != len(v2) or len(v3) != len(v4):
+    raise Exception("Length not equal")
+  for index in range(0, len(v1)):
+    errorIn = errorIn + numpy.power(numpy.absolute(v1[index] - v2[index]), graphfeature.maxDepth - index + 1)
+  for index in range(0, len(v3)):
+    errorOut = errorOut + numpy.power(numpy.absolute(v3[index] - v4[index]), graphfeature.maxDepth - index + 1)
+  return errorIn + errorOut # / float(len(v1))
+
 def ppArray(a, depth=0):
   for ele in a:
     if isinstance(ele, list):
@@ -67,6 +78,7 @@ def cleanInfValues(v):
       v[index] = 0
 
 def compareDirPart(node1InFeatures, node2InFeatures, node1OutFeatures, node2OutFeatures):
+  '''
   indexesUsed = []
   bestIndexes = []
   for index1 in range(0, len(node1InFeatures)):
@@ -86,22 +98,25 @@ def compareDirPart(node1InFeatures, node2InFeatures, node1OutFeatures, node2OutF
           cleanInfValues(v4)
           test = sqrDir(v1, v2, v3, v4)
           dist = test
-          dists.append(dist)
-    maxIndex = -1
-    for index in range(0, len(dists)):
-      if maxIndex == -1 and index not in indexesUsed:
-        maxIndex = index
-      elif dists[maxIndex] > dists[index] and index not in indexesUsed:
-        maxIndex = index
-    if maxIndex != -1:
-      indexesUsed.append(maxIndex)
-      bestIndexes.append((index1, maxIndex, dists[maxIndex]))
-  return bestIndexes
+          dists.append((index1, index2, index3, index4, dist))
+        maxIndex = -1
+        for index in range(0, len(dists)):
+          if maxIndex == -1 and index not in indexesUsed:
+            maxIndex = index
+          elif dists[maxIndex] > dists[index] and index not in indexesUsed:
+            maxIndex = index
+        if maxIndex != -1:
+          indexesUsed.append(maxIndex)
+          bestIndexes.append((index1, maxIndex, dists[maxIndex]))
+  '''
+  indexesIn = compareUndirPart(node1InFeatures, node2InFeatures)
+  indexesOut = compareUndirPart(node1OutFeatures, node2OutFeatures)
+  return (indexesIn, indexesOut)
 
 def compareUndir(node1Features, node2Features):
   if node1Features[0][0] == 0 and node2Features[0][0] == 0:
     return ([(0, 0)], 0.0)
-  elif node2Features[0][0] == 0:
+  elif node1Features[0][0] == 0 or node2Features[0][0] == 0:
     return ([(0, 0)], numpy.inf)
   length = len(node1Features[0]) if len(node1Features[0]) < len(node2Features[0]) else len(node2Features[0])
   node1FeaturesLocal = cutMatrixElementsToLength(node1Features, length)
@@ -121,32 +136,29 @@ def cutMatrixElementsToLength(nodeFeatures, length):
 
 def compareDir(node1InFeatures, node2InFeatures, node1OutFeatures, node2OutFeatures):
   if node1InFeatures[0][0] == 0 and node1OutFeatures[0][0] == 0 and node2InFeatures[0][0] == 0 and node2OutFeatures[0][0] == 0:
-    return ([(0, 0)], 0.0)
-  elif node2Features[0][0] == 0:
-    return ([(0, 0)], numpy.inf)
+    return ([(0, 0)], [(0, 0)], 0.0)
+  elif (
+        ((node1InFeatures[0][0] == 0 and node2InFeatures[0][0] != 0) or (node1InFeatures[0][0] != 0 and node2InFeatures[0][0] == 0)) or 
+        ((node1OutFeatures[0][0] == 0 and node2OutFeatures[0][0] != 0) or (node1OutFeatures[0][0] != 0 and node2OutFeatures[0][0] == 0))
+       ):
+    return ([(0, 0)], [(0, 0)], numpy.inf)
   lengthIn = len(node1InFeatures[0]) if len(node1InFeatures[0]) < len(node2InFeatures[0]) else len(node2InFeatures[0])
   lengthOut = len(node1OutFeatures[0]) if len(node1OutFeatures[0]) < len(node2OutFeatures[0]) else len(node2OutFeatures[0])
   node1InFeaturesLocal = cutMatrixElementsToLength(node1InFeatures, lengthIn)
-  node2InFeaturesLocal = CutMatrixElementsToLength(node2InFeatures, lengthIn)
+  node2InFeaturesLocal = cutMatrixElementsToLength(node2InFeatures, lengthIn)
   node1OutFeaturesLocal = cutMatrixElementsToLength(node1OutFeatures, lengthOut)
   node2OutFeaturesLocal = cutMatrixElementsToLength(node2OutFeatures, lengthOut)
 
-  indexes = []
-  indexes.append(compareDirPart(node1InFeaturesLocal, node2InFeaturesLocal, node1OutFeaturesLocal, node2OutFeaturesLocal))
-  indexes.append(compareDirPart(node2InFeaturesLocal, node1InFeaturesLocal, node2OutFeaturesLocal, node1OutFeaturesLocal))
-  
-  diffMin = None
-  indexMin = 0
-  for index in range(0, len(indexes)):
-    diff = diff(indexes[index])
-    if diffMin == None:
-      diffMin = diff
-      indexMin = index
-    else:
-      if diffMin > diff:
-        diffMin = diff
-        indexMin = index
-  return (indexMin, diffMin)
+  indexes1In, indexes1Out = compareDirPart(node1InFeaturesLocal, node2InFeaturesLocal, node1OutFeaturesLocal, node2OutFeaturesLocal)
+  indexes2In, indexes2Out = compareDirPart(node2InFeaturesLocal, node1InFeaturesLocal, node2OutFeaturesLocal, node1OutFeaturesLocal)
+
+  diff1In = diff(indexes1In)
+  diff1Out = diff(indexes1Out)
+  diff2In = diff(indexes2In)
+  diff2Out = diff(indexes2Out)
+  diff1 = diff1In + diff1Out
+  diff2 = diff2In + diff2Out
+  return (indexes1In, indexes1Out, diff1) if diff1 < diff2 else (indexes2In, indexes2Out, diff2)
 
 def diff(v):
   diffVal = 0
@@ -219,8 +231,8 @@ def calcDiffsDir(adjMat, d_in, d_out):
   for index1 in range(0, len(normalizedMatrixIn)):
     for index2 in range(index1 + 1, len(normalizedMatrixIn)):
       cVal = compareDir(normalizedMatrixIn[index1], normalizedMatrixIn[index2], normalizedMatrixOut[index1], normalizedMatrixOut[index2])
-      pairs.append((index1, index2, cVal[1]))
-      keyPairs[(index1, index2)] = cVal[1]
+      pairs.append((index1, index2, cVal[2]))
+      keyPairs[(index1, index2)] = cVal[2]
 
   pairs.sort(key=lambda x: x[2], reverse=False)
   return pairs, keyPairs
@@ -302,9 +314,9 @@ if __name__ == "__main__":
   printPairs(pairs1)
 
   #directed graph
-  #pairs2, pairs3 = calcDiffsDir(adjMat_dir, D_in, D_out)
-  #printPairs(pairs2)
-  #printPairs(pairs4)
+  pairs2, keyPairs2 = calcDiffsDir(adjMat_dir, D_in, D_out)
+  print "Directed Graph Differences between nodes"
+  printPairs(pairs2)
   #for ele2 in pairs2:
   #  cVal1 = ele2[2]
   #  cVal2 = keyPairs3[(ele2[0], ele2[1])]
