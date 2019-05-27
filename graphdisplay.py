@@ -7,7 +7,8 @@ import numpy as np
 def renderDiGraphFromAdj(adjMat):
   graph = nx.DiGraph(adjMat)
   #pos = nx.circular_layout(graph)
-  pos = nx.spectral_layout(graph)
+  #pos = nx.spectral_layout(graph)
+  pos = nx.shell_layout(graph)
   #nx.draw(graph, cmap = plt.get_cmap('jet'))
   nx.draw_networkx_nodes(graph, pos, nodelist=graph.nodes, ax=None, node_size=400)
   nx.draw_networkx_edges(graph, pos, edgelist=graph.edges, width=1.0, alpha=0.5)
